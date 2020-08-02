@@ -63,6 +63,14 @@ def test_argument_parsing_special(test_value, expected_result):
     assert result.special == expected_result
 
 
+@pytest.mark.parametrize("test_value, expected_result", [
+    ([], 1), (["-n", "2"], 2), (["-n", "40"], 40)
+])
+def test_argument_parsing_number_of_passwords(test_value, expected_result):
+    result = randpass.argument_parsing(test_value)
+    assert result.number == expected_result
+
+
 # main testing
 
 @mock.patch.object(randpass, "UPPER_LETTERS", ("A", "B", "C"))
@@ -98,3 +106,17 @@ def test_main_one_special(capsys):
     assert result == 0
     assert len(captured.strip()) == 10
     assert captured.count("@") == 1
+
+
+@pytest.mark.parametrize("test_parm, expected_len", [
+    ([], 1), (["-n", "2"], 2), (["-n", "50"], 50)
+])
+@mock.patch.object(randpass, "UPPER_LETTERS", ("A", "B", "C"))
+@mock.patch.object(randpass, "LOWER_LETTERS", ("a", "b", "c"))
+@mock.patch.object(randpass, "DIGITS", ("1", "2", "3"))
+def test_main_number_of_passwords(test_parm, expected_len, capsys):
+    result = randpass.main(test_parm)
+    captured = capsys.readouterr().out
+    assert result == 0
+    captured = captured.splitlines()
+    assert len(captured) == expected_len

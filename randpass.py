@@ -52,6 +52,8 @@ def argument_parsing(args: Optional[Sequence[str]] = None) -> argparse.Namespace
                         help="Length of the password (default 10)")
     parser.add_argument("-s", "--special", type=int, default=0,
                         help="Number of special char to use.")
+    parser.add_argument("-n", "--number", type=int, default=1,
+                        help="Number of passwords to generate")
 
     return parser.parse_args(args)
 
@@ -59,8 +61,9 @@ def argument_parsing(args: Optional[Sequence[str]] = None) -> argparse.Namespace
 def main(args: Optional[Sequence[str]] = None) -> int:
     argv = argument_parsing(args)
     possible = make_possible()
-    password = generate_password(possible, argv.length, argv.special)
-    print(password)
+    for x in range(argv.number):
+        password = generate_password(possible, argv.length, argv.special)
+        print(password)
     return 0
 
 
