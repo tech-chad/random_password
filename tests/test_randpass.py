@@ -46,6 +46,15 @@ def test_make_possible():
     assert result == ["A", "B", "C", "a", "b", "c", "1", "2", "3"]
 
 
+def test_save_to_file(tmpdir):
+    test_passwords = ["abcdef", "badpassword", "test_password"]
+    test_filename = tmpdir.join("test_file")
+    randpass.save_to_file(test_filename.strpath, test_passwords)
+    data = test_filename.read()
+    data = data.splitlines()
+    assert data == test_passwords
+
+
 # argument parsing
 @pytest.mark.parametrize("test_value, expected_result", [
     ([], 10), (["-l", "8"], 8), (["-l", "20"], 20)
@@ -69,6 +78,14 @@ def test_argument_parsing_special(test_value, expected_result):
 def test_argument_parsing_number_of_passwords(test_value, expected_result):
     result = randpass.argument_parsing(test_value)
     assert result.number == expected_result
+
+
+@pytest.mark.parametrize("test_value, expected_result", [
+    ([], ""), (["-o", "test_output"], "test_output"),
+])
+def test_argument_parsing_output_file(test_value, expected_result):
+    result = randpass.argument_parsing(test_value)
+    assert result.output == expected_result
 
 
 # main testing
@@ -120,3 +137,18 @@ def test_main_number_of_passwords(test_parm, expected_len, capsys):
     assert result == 0
     captured = captured.splitlines()
     assert len(captured) == expected_len
+
+
+@mock.patch.object(randpass, "UPPER_LETTERS", ("A", "B", "C"))
+@mock.patch.object(randpass, "LOWER_LETTERS", ("a", "b", "c"))
+@mock.patch.object(randpass, "DIGITS", ("1", "2", "3"))
+def test_main_save_to_file(tmpdir, capsys):
+    test_file = tmpdir.join("test_file")
+    result = randpass.main(["-n", "4", "-o", test_file.strpath])
+    captured = capsys.readouterr().out
+    assert result == 0
+    captured = captured.splitlines()
+    data = test_file.read()
+    data = data.splitlines()
+    assert len(data) == 4
+    assert data == captured

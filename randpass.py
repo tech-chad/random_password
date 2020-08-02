@@ -46,6 +46,12 @@ def make_possible() -> List[str]:
     return possible
 
 
+def save_to_file(filename: str, passwords: List[str]) -> None:
+    with open(filename, "w") as f:
+        for password in passwords:
+            f.write(f"{password}\n")
+
+
 def argument_parsing(args: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--length", type=int, default=10,
@@ -54,16 +60,21 @@ def argument_parsing(args: Optional[Sequence[str]] = None) -> argparse.Namespace
                         help="Number of special char to use.")
     parser.add_argument("-n", "--number", type=int, default=1,
                         help="Number of passwords to generate")
-
+    parser.add_argument("-o", "--output", type=str, default="", metavar="filename",
+                        help="Save generated passwords to filename entered")
     return parser.parse_args(args)
 
 
 def main(args: Optional[Sequence[str]] = None) -> int:
+    password_list = []
     argv = argument_parsing(args)
     possible = make_possible()
     for x in range(argv.number):
         password = generate_password(possible, argv.length, argv.special)
+        password_list.append(password)
         print(password)
+    if argv.output:
+        save_to_file(argv.output, password_list)
     return 0
 
 
